@@ -1,5 +1,5 @@
 
-from http.server import  BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class webserverHandler (BaseHTTPRequestHandler):
     def do_GET(self):
@@ -9,9 +9,12 @@ class webserverHandler (BaseHTTPRequestHandler):
                 self.send_header('Content-type','text/html')
                 self.end_headers()
 
-                output = ""
-                output += "<html><body>Hello!</body></html>"
+                output =b""
+                output += b"<html>"
+                output += b"<h1>Hello</h1>"
+                output += b"</html>"
                 self.wfile.write(output)
+                #self.wfile.write(output)#"<body><h1>This is a test.</h1></body>")
                 print(output)
                 return
 
@@ -24,6 +27,7 @@ def main():
         server = HTTPServer(('',port), webserverHandler)
         print("web server poet %s" %port)
         server.serve_forever()
+
 
     except KeyboardInterrupt:
         print("^C Entered , Stopping server")
