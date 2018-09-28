@@ -18,8 +18,8 @@ class webserverHandler (BaseHTTPRequestHandler):
                 output += b">Go to WELCOME</a>"
                 # output += b"<html>"
                 # output += b"<h1>Hello</h1>"
-                output += b"</html>"
-                output += b"<html><body>"
+                # output += b"</html>"
+                # output += b"<html><body>"
                 output += b"<h1>HELLO</h1>"
                 output += b'''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
                 output += b"</body></html>"
