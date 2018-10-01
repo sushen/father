@@ -13,7 +13,7 @@ they are webserver.py, data_map.py, AddSomeExtraUser.py and the database father.
 
 3. AddSomeExtraUser.py is a script that can add extra user. When you ran it it will creat some extra user so you can play with it.
 
-4.father.db is database file with some data . If you run data_map.py you always get a father.db file but if you want a blank database just run data_map.py
+4. father.db is database file with some data . If you run data_map.py you always get a father.db file but if you want a blank database just run data_map.py
 
 
 all taht case is extrem.
