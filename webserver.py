@@ -33,36 +33,50 @@ class webserverHandler (BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type','text/html')
                 self.end_headers()
-
                 output = ""
                 output += "<html><body>"
-                output += "<h1> All Our Registerd User</h1>"
-                output += "</br>"
-                output += "<h3> <a href ='/user/new'> Add New User</a></h3>"
-
-                output += "</br>"
-
-
+                output += "<h2><a href='/user/new'>Add New User</a></h2>"
+                output += "<br/>"
                 users = session.query(UserInfo).all()
                 for user in users:
                     output += str(user.id)
                     output += "</br>"
                     output += str(user.email)
                     output += "<br/>"
-                    output += "<a href = '/user/edit'> Edit </a>"
+                    output += "<a href ='/user/%s/edit' >Edit </a> " % user.id
                     output += "<br/>"
-                    output += "<a href = '/user/delete'> Delete </a>"
+                    output += "<a href ='/user/%s/delete' >delete </a> " % user.id
                     output += "</br></br>"
-
-
                 output += "</body></html>"
-
                 self.wfile.write(bytes(output, 'utf-8'))
-                print(output)
                 return
 
+            if self.path.endswith("/edit"):
+                userIDPath = self.path.split("/")[2]
+                editUserQuery = session.query(UserInfo).filter_by(id=userIDPath).one()
+
+                if editUserQuery != []:
+                    self.send_response(200)
+                    self.send_header('Content-type','text/html')
+                    self.end_headers()
+                    output = "<html><body>"
+
+                    output += "<p>Do you Want to edit:</p>"
+
+                    output += "<h2> %s </h1>" % editUserQuery.email
+
+
+                    output += "<form method='POST' enctype='multipart/form-data' action = '/user/%s/edit' >" % userIDPath
+                    output += "<input name = 'newEmailAddress' type='text' placeholder = '%s' >" % editUserQuery.email
+                    output += "<input type = 'submit' value = 'Rename'>"
+                    output += "</form>"
+
+                    output += "</body></html>"
+                    self.wfile.write(bytes(output, 'utf-8'))
+                    #print(output)
+                    return
+
             if self.path.endswith('/user/new'):
-                users = session.query(UserInfo).all()
                 self.send_response(200)
                 self.send_header('Content-type','text/html')
                 self.end_headers()
@@ -77,40 +91,26 @@ class webserverHandler (BaseHTTPRequestHandler):
 
                 output += "</body></html>"
                 self.wfile.write(bytes(output, 'utf-8'))
-                print(output)
+                #print(output)
                 return
 
-            if self.path.endswith('/user/edit'):
-                users = session.query(UserInfo).all()
-                self.send_response(200)
-                self.send_header('Content-type','text/html')
-                self.end_headers()
+            if self.path.endswith('/delete'):
+                UserInfoIDPath = self.path.split("/")[2]
+                deleteUser = session.query(UserInfo).filter_by(id=UserInfoIDPath).one()
+                if deleteUser:
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
+                    output = "<html><body>"
+                    output += "<h1>"
+                    output += str(deleteUser.email)
+                    output += "</h1>"
+                    output += "<form method='POST' enctype='multipart/form-data' action = '/user/%s/delete' >" % UserInfoIDPath
+                    output += "<input type = 'submit' value = 'Delete'>"
+                    output += "</form>"
+                    output += "</body></html>"
 
-                output = ""
-                output += "<html><body>"
-
-                output += "<h2>Edit User </h1>"
-
-                output += "</body></html>"
-                self.wfile.write(bytes(output, 'utf-8'))
-                print(output)
-                return
-
-            if self.path.endswith('/user/delete'):
-                users = session.query(UserInfo).all()
-                self.send_response(200)
-                self.send_header('Content-type','text/html')
-                self.end_headers()
-
-                output = ""
-                output += "<html><body>"
-
-                output += "<h2>Delete User </h1>"
-
-                output += "</body></html>"
-                self.wfile.write(bytes(output, 'utf-8'))
-                print(output)
-                return
+                    self.wfile.write(bytes(output, 'utf-8'))
 
 
         except IOError:
@@ -150,6 +150,40 @@ class webserverHandler (BaseHTTPRequestHandler):
                 #print (output)
                 return
 
+            if self.path.endswith("/edit"):
+                ctype, pdict = cgi.parse_header(self.headers.get('content-type'))
+                pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
+
+                if ctype == 'multipart/form-data':
+                    fields = cgi.parse_multipart(self.rfile, pdict)
+                messagecontent = fields.get('newEmailAddress')
+
+                userIDPath = self.path.split("/")[2]
+                editUserQuery = session.query(UserInfo).filter_by(id=userIDPath).one()
+
+                if editUserQuery != []:
+                    editUserQuery.email = str(messagecontent[0])
+                    session.add(editUserQuery)
+                    session.commit()
+
+                    self.send_response(301)
+                    self.send_header('Content-type', 'text/html')
+                    self.send_header('Location', '/user')
+                    self.end_headers()
+                    self.wfile.write(bytes('utf-8'))
+
+            if self.path.endswith('/delete'):
+                userIDPath = self.path.split("/")[2]
+                editUserQuery = session.query(UserInfo).filter_by(id=userIDPath).one()
+
+                if editUserQuery:
+                    session.delete(editUserQuery)
+                    session.commit()
+                    self.send_response(301)
+                    self.send_header('Content-type', 'text/html')
+                    self.send_header('Location', '/user')
+                    self.end_headers()
+
         except:
             pass
 
@@ -159,7 +193,6 @@ def main():
         server = HTTPServer(('',port), webserverHandler)
         print("web server uri http://localhost:%s" %port)
         server.serve_forever()
-
 
     except KeyboardInterrupt:
         print("^C Entered , Stopping server")
