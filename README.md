@@ -1,5 +1,8 @@
 # father
 SUSHEN BISWAS FATHER AI
+we use minimal python lighbary
+$. http.server (Internal)
+$.SQL Alchemy (External : that means you have to install it. normally we use pip install SQLAlchemy to install it.)
 
 There is 4 file . Including a database file.
 
